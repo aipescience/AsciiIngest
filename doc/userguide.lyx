@@ -1,0 +1,860 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2.5cm
+\rightmargin 2.5cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+AsciiIngest
+\end_layout
+
+\begin_layout Author
+Adrian Partl
+\end_layout
+
+\begin_layout Date
+Version 0.9beta
+\end_layout
+
+\begin_layout Part
+Introduction / Intent
+\end_layout
+
+\begin_layout Standard
+AsciiIngest is build on the DBIngestor database ingestion library.
+ This software can be used, to ingest large datasets into various databases.
+ The data has to be in ASCII format and needs to be row based.
+ The databases that are supported are given by the capabilities of the DBIngesto
+r library.
+\end_layout
+
+\begin_layout Standard
+AsciiIngest is largely inspired by the MS SQL Server 
+\emph on
+bcp
+\emph default
+ tool.
+ Similar to 
+\emph on
+bcp
+\emph default
+, AsciiIngest uses a 
+\emph on
+structure file
+\emph default
+ to describe the structure of the ASCII file and how it should be read.
+ Prominent features of AsciiIngest are the ability to read data from a possible
+ header section in the ASCII file, apply constant values to columns, and
+ apply assertion and convertion functions to the data.
+ Assertion and convertion functions need to be implemented in the DBIngestor
+ library and can be easily added.
+\end_layout
+
+\begin_layout Standard
+This document describes basic usage of AsciiIngest and gives a brief overview
+ of all its capabilities.
+ However at the current state, this document is far from complete and should
+ be extended to be more precise.
+\end_layout
+
+\begin_layout Part
+Compilation
+\end_layout
+
+\begin_layout Standard
+AsciiIngest uses the following dependancies, that must be met before compilation
+:
+\end_layout
+
+\begin_layout Itemize
+cmake
+\end_layout
+
+\begin_layout Itemize
+Boost Library (especially Program Options)
+\end_layout
+
+\begin_layout Itemize
+DBIngestor library (https://github.com/adrpar/DBIngestor)
+\end_layout
+
+\begin_layout Itemize
+One or more of the following database drivers:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Sqlite3
+\end_layout
+
+\begin_layout Itemize
+mysql C AIP
+\end_layout
+
+\begin_layout Itemize
+ODBC (tested with UnixODBC and MS ODBC driver)
+\end_layout
+
+\begin_layout Itemize
+in order to connect to SQL Server from Unix: FreeTDS
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+When these dependancies are met, you can easily compile AsciiIngest by:
+\end_layout
+
+\begin_layout Enumerate
+cd into AsciiIngest directory.
+ Make sure that the DBIngestor directory lies at ../DBIngestor (TODO: This
+ needs to be changed in the code to make a proper library)
+\end_layout
+
+\begin_layout Enumerate
+edit CMakeLists.txt or use the cmake gui tools
+\begin_inset Newline newline
+\end_inset
+
+You can turn any of the DB interfaces on and off, by commenting out any
+ of SQLITE3_BUILD_IFFOUND, MYSQL_BUILD_IFFOUND, and ODBC_BUILD_IFFOUND options
+ in the CmakeList.txt file.
+\end_layout
+
+\begin_layout Enumerate
+mkdir build
+\end_layout
+
+\begin_layout Enumerate
+cd build
+\end_layout
+
+\begin_layout Enumerate
+cmake -DDBINGESTOR_LIBRARY_PATH:PATH=/usr/local/DBIngestor/lib -DDBINGESTOR_INCL
+UDE_PATH:PATH=/usr/local/DBIngestor/include ..
+\end_layout
+
+\begin_layout Enumerate
+make
+\end_layout
+
+\begin_layout Enumerate
+done
+\end_layout
+
+\begin_layout Part
+Command line options
+\end_layout
+
+\begin_layout Standard
+The way AsciiIngest behaves, can be heavily customised through command line
+ options.
+ With 
+\emph on
+AsciiIngest --help
+\emph default
+ or 
+\emph on
+AsciiIngest -?
+\emph default
+ you can get an overview of all the possible options.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--structFile:
+\series default
+ The path to the structure file used to read the data file.
+ See the chapter below on how to write structure files.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--data, -d:
+\series default
+ Path to the ASCII data file that will be ingested into the database.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--system, -s:
+\series default
+ The data base system to be used for the ingest.
+ This depends on the available dependencies and libraries on your system.
+ The following systems are supported up to now:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\series bold
+sqlite3
+\series default
+: the SQLite3 API is used.
+ This means, that --path needs to be specified to specify the path to the
+ database file
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+mysql
+\series default
+: the MySQL API is used to connect to a MySQL database 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+unix_sqlsrv_odbc
+\series default
+: the UnixODBC together with the FreeTDS driver is used, to connect to a
+ remote MS SQL Server database
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+sqlsrv_odbc
+\series default
+: the MS ODBC SQL Server driver is used to connect to a SQL Server database
+ (version 10.0 driver)
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+sqlsrv_odbc_bulk
+\series default
+: same as above, however using ODBC bulk operations.
+ (WARNING: Slow method...
+ Why not clear yet)
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+cust_odbc
+\series default
+: using a ODBC connection to connect to a database.
+ Use the --socket option to specify the ODBC connection string for the driver
+ to be used.
+ These should contain any options except user name, password, host, port.
+ Don't forget to end the statement with ';'! Example:
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+--socket="SQL Server Native Client 10.0;"
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+cust_odbc_bulk
+\series default
+: same as above, however using ODBC bulk operations.
+ (WARNING: Can be slower than the normal ODBC connection - at least for
+ MS SQL Server).
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\series bold
+--bufferSize, -B:
+\series default
+ [default: 128]: The size of the ingestion buffer that is used for the ingest.
+ This determines the number of rows that are transmitted at one time to
+ the database server.
+ Limits by the database system exist and will be checked by AsciiIngest
+ if you specify a larger than supported buffer.
+ Performance can vary alot on this parameter.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--outputFreq, -F:
+\series default
+ [default: 10000]: Number of rows that are ingested, before a status information
+ and the time needed to ingest the specified amount of rows is printed on
+ the command line.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--dbase, -D:
+\series default
+ Name of the database/schema where the data is ingested into
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--table, -T:
+\series default
+ Name of the table where the data is ingested into
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--comment, -C:
+\series default
+ [default: #]: The string with which comments in the data file are marked
+ and thus skipped.
+ WARNING: This does not specify the comment string to determine comments
+ in the structure file!
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--socket, -S:
+\series default
+ Socked used to connect to the database
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--user, -U:
+\series default
+ User name
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--pwd, -P:
+\series default
+ Password
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--port, -O:
+\series default
+ [default: 3306 (mysql)]: The port through which to connect to the database.
+ MySQL uses 3306, MS SQL Server uses 1433.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--host, -H:
+\series default
+ [default: localhost]: Address to the database server
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--path, -p:
+\series default
+ Path to the database file (only used for SQLite3)
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--disableKeys:
+\series default
+ [default: 0]: Disable all keys/indexes on the server side before ingesting
+ the data.
+ This can take some time to complete.
+ WARNING: Disabling keys on large data sets can take a long time to regenerate.
+ WARNING: Not disabling keys on the table can slow down ingestion of data
+ substantially.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--enableKeys:
+\series default
+ [default: 0]: Reenable all the keys/indexes on the server after ingestion
+ fininshed.
+ WARNING: This operation can take a long time.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--userValHeader, -V:
+\series default
+ [default: 1]: If information is read from a header section in the ASCII
+ file (as specified in the structure file), ask the user first if the data
+ has been properly extracted (1 = TRUE, 0 = FALSE).
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+--greedyDelim, -G:
+\series default
+ [default: 0]: Should multiple equal delimiters be merged into one (1 =
+ TRUE, greedy read) or not (0 = FALSE)
+\end_layout
+
+\begin_layout Part
+Structure Files
+\end_layout
+
+\begin_layout Standard
+Structure files determine how the ASCII data file is read and mapped onto
+ the database.
+ The follwing gives an example of the structure of a structure file:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float algorithm
+placement H
+wide false
+sideways true
+status open
+
+\begin_layout Plain Layout
+\begin_inset listings
+lstparams "basicstyle={\scriptsize}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+numCols 
+\end_layout
+
+\begin_layout Plain Layout
+
+numHeaderRows 
+\end_layout
+
+\begin_layout Plain Layout
+
+#numCol	DType	PrefixLen	DataLen	Separator	SchemaColName	AssertAndConvList
+\end_layout
+
+\begin_layout Plain Layout
+
+D1	CHAR	0		10	','		haloName	ASRT_ISNOTNULL, CONV_CAPITALIZE,CONV_TRIM 
+\end_layout
+
+\begin_layout Plain Layout
+
+D2	INT4	1		40	','		numParticles	ASRT_ISNOTNULL, ASRT_ISNOTNEGATIVE, CONV_MULTIPL
+Y(D2) 
+\end_layout
+
+\begin_layout Plain Layout
+
+#D2	INT4	1		40	','		numParticles	ASRT_ISNOTNULL, ASRT_ISNOTNEGATIVE, CONV_MULTIP
+LY(D2; 12.0) 
+\end_layout
+
+\begin_layout Plain Layout
+
+#These are examples of header items 
+\end_layout
+
+\begin_layout Plain Layout
+
+#numCol	DType	LineNum:offset	DataLen Separator	SchemaColName	AssertList	
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+H3  INT4   0   0   'Redshift:' redshift    ASRT_ISNOTNULL,CONV_FLOOR 
+\end_layout
+
+\begin_layout Plain Layout
+
+H4  REAL4   10:5  1   ''  expFact ASRT_ISNOTNULL,CONV_FLOOR,CONV_MULTIPLY(3.1415)
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+#These are examples of constant items 
+\end_layout
+
+\begin_layout Plain Layout
+
+C5  REAL4   0   0   '3.14156'   pi  ASRT_ISNOTNULL 
+\end_layout
+
+\begin_layout Plain Layout
+
+C6  INT 4   0   0   '2' someMagicNumber 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Example structure file
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Comments are marked with '#'.
+\end_layout
+
+\begin_layout Itemize
+The first line should state the number of columns to be read
+\end_layout
+
+\begin_layout Itemize
+The second line states the number of rows in the ASCII file that represent
+ the header
+\end_layout
+
+\begin_layout Standard
+Each row in the structure file that follows represents a column in the ASCII
+ file.
+ In each data row, the following information that is delimited by whitespaces
+ need to be supplied:
+\end_layout
+
+\begin_layout Subsection*
+Data columns:
+\end_layout
+
+\begin_layout Itemize
+numCol: The number of this column.
+ Data columns from the ASCII file should start with a 'D', header colums
+ with 'H' and constant items with 'C'.
+\end_layout
+
+\begin_layout Itemize
+DType: The data type of this column in the ASCII file.
+ Supported are: CHAR, INT2 (integer with 2 bytes, 16 bits), INT4 (integer
+ with 4 bytes, 32 bits), INT8 (integer with 8 bytes, 64 bits), REAL4 (float,
+ 32 bits), REAL8 (double, 64 bits).
+ All datatypes are signed.
+ Unsigned data types are NOT YET supported.
+\end_layout
+
+\begin_layout Itemize
+PrefixLen: If separator is not specified: The number of characters to be
+ skiped, before the data field begins.
+\end_layout
+
+\begin_layout Itemize
+DataLen: If separator is not specified: The number of characters to be read
+ for the data field.
+\end_layout
+
+\begin_layout Itemize
+Separator: If a separator is specified, the field delimited by this separator
+ is read, starting from the position of the last column in the file.
+ Separators have to be specified between singe quotes '.
+ If an empty separator is defined (i.e.
+ ''), then PrefixLen and DataLen will be used to read the data field.
+\end_layout
+
+\begin_layout Itemize
+SchemaColName: Name of the column in the database table on the server.
+\end_layout
+
+\begin_layout Itemize
+AssertAndConvList: A comma delimited list of asserter and converter functions.
+ Assertion functions are marked by ASRT_, Converters by CONV_.
+ Converters can be functions, where the function parameters are stated in
+ parenthesis.
+ Function parameters can either by data columns (i.e.
+ any numCol except ones own) or numerical values.
+ If a Converter supports multiple function parameters, they are delimited
+ by ';'.
+ The asserters and converters are applied from left to right.
+\end_layout
+
+\begin_layout Subsection*
+Header columns:
+\end_layout
+
+\begin_layout Standard
+Any numCol that starts with a 'H' is a header column.
+ I.e.
+ information from the header of the ASCII data file is read.
+ Header rows are differently structured:
+\end_layout
+
+\begin_layout Itemize
+numCol: as in data column, only starting with an 'H'
+\end_layout
+
+\begin_layout Itemize
+DType: as in data column
+\end_layout
+
+\begin_layout Itemize
+LineNum:offset: If separator is not specified: Number of the line where
+ to read the information from (1 is the first line), offset marks the character
+ from the left where to start reading
+\end_layout
+
+\begin_layout Itemize
+DataLen: If separator is not specified: The number of characters to be read
+ for the data field
+\end_layout
+
+\begin_layout Itemize
+Separator: Separator in a header row can be a word/string that exists in
+ the header and the data delimited by whitespaces right of that string will
+ be read as a data field.
+ Given between two quotes.
+\end_layout
+
+\begin_layout Itemize
+SchemaColName: as in data column
+\end_layout
+
+\begin_layout Itemize
+AssertAndConvList: as in data column
+\end_layout
+
+\begin_layout Subsection*
+Constant columns:
+\end_layout
+
+\begin_layout Standard
+Constant columns are columns that hold the same value (or using Converters
+ are results of these):
+\end_layout
+
+\begin_layout Itemize
+numCol: as in data column, only starting with an 'C'
+\end_layout
+
+\begin_layout Itemize
+DType: as in data column
+\end_layout
+
+\begin_layout Itemize
+PrefixLen: this field is ignored
+\end_layout
+
+\begin_layout Itemize
+DataLen: this field is ignored
+\end_layout
+
+\begin_layout Itemize
+Separator: the constant value between two quotes
+\end_layout
+
+\begin_layout Itemize
+SchemaColName: as in data column
+\end_layout
+
+\begin_layout Itemize
+AssertAndConvList: as in data column
+\end_layout
+
+\begin_layout Part
+Asserters
+\end_layout
+
+\begin_layout Standard
+This is a list of implemented assertion functions:
+\end_layout
+
+\begin_layout Itemize
+ASRT_ISNEGATIVE
+\end_layout
+
+\begin_layout Itemize
+ASRT_ISNOTINF
+\end_layout
+
+\begin_layout Itemize
+ASRT_ISNOTNAN
+\end_layout
+
+\begin_layout Itemize
+ASRT_ISPOSITIVE
+\end_layout
+
+\begin_layout Part
+Converters
+\end_layout
+
+\begin_layout Standard
+This is a list of implemented convertion functions:
+\end_layout
+
+\begin_layout Itemize
+CONV_ADD (one param)
+\end_layout
+
+\begin_layout Itemize
+CONV_DIVIDE (one param)
+\end_layout
+
+\begin_layout Itemize
+CONV_FLOOR (no param)
+\end_layout
+
+\begin_layout Itemize
+CONV_MADD: multiply and add: first parameter will be multiplied and second
+ is then added
+\end_layout
+
+\begin_layout Itemize
+CONV_MULTIPLY (one param)
+\end_layout
+
+\begin_layout Itemize
+CONV_SUBTRACT (one param)
+\end_layout
+
+\begin_layout Itemize
+CONV_IFTHENELSE: if 
+\begin_inset Quotes eld
+\end_inset
+
+first parameter == 1
+\begin_inset Quotes erd
+\end_inset
+
+ then 
+\begin_inset Quotes eld
+\end_inset
+
+second parameter
+\begin_inset Quotes erd
+\end_inset
+
+ else 
+\begin_inset Quotes eld
+\end_inset
+
+third parameter
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+CONV_ISEQ: (two params): tests first param == second param (1 if true, 0
+ if false)
+\end_layout
+
+\begin_layout Itemize
+CONV_ISGE: (two params): tests first param >= second param (1 if true, 0
+ if false)
+\end_layout
+
+\begin_layout Itemize
+CONV_ISGT: (two params): tests first param > second param (1 if true, 0
+ if false)
+\end_layout
+
+\begin_layout Itemize
+CONV_ISLE: (two params): tests first param <= second param (1 if true, 0
+ if false)
+\end_layout
+
+\begin_layout Itemize
+CONV_ISLT: (two params): tests first param < second param (1 if true, 0
+ if false)
+\end_layout
+
+\begin_layout Itemize
+CONV_ISNE: (two params): tests first param != second param (1 if true, 0
+ if false)
+\end_layout
+
+\end_body
+\end_document

@@ -1,0 +1,17 @@
+AsciiIngest tool
+----------------
+
+A general ASCII file row based ingestion tool using the DBIngestor library.
+This tool allows you to define custom ASCII data formats similar to the 
+MS SQL Server format files. However it is possible to define custom checks,
+transformation functions, derived data rows, and constant data rows. It is 
+easy to extend the assertion and convertion functions, by implementing ones 
+own functions in the DBIngestor library. Further the DBIngestor library
+provided data buffering for higher ingest performance and many interfaces
+to various DB systems.
+
+
+Please consult doc/userguide.pdf for instrucitons on how to use
+this tool or contact the author for further help and instructions:
+
+apartl@aip.de

@@ -1,0 +1,8 @@
+Installation
+------------
+
+AsciiIngest needs the DBIngestor library. Please download it at
+
+https://github.com/adrpar/DBIngestor
+
+Please consult doc/userguide.pdf

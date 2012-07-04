@@ -1,0 +1,7 @@
+//This is a comment
+/This is HN1, 1234567
+AnotherHalo1, 99999
+Halo2, 88234 //comment at the back should be ok
+Halo4, //Illegal stuff
+Halo5, 2345
+Halo//no, 123142
