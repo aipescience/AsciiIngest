@@ -71,7 +71,7 @@ Adrian Partl
 \end_layout
 
 \begin_layout Date
-Version 0.9beta
+Version 0.91beta
 \end_layout
 
 \begin_layout Part
@@ -164,8 +164,7 @@ When these dependancies are met, you can easily compile AsciiIngest by:
 
 \begin_layout Enumerate
 cd into AsciiIngest directory.
- Make sure that the DBIngestor directory lies at ../DBIngestor (TODO: This
- needs to be changed in the code to make a proper library)
+ Make sure that you have installed the DBIngestor library appropriately.
 \end_layout
 
 \begin_layout Enumerate
@@ -187,8 +186,19 @@ cd build
 \end_layout
 
 \begin_layout Enumerate
-cmake -DDBINGESTOR_LIBRARY_PATH:PATH=/usr/local/DBIngestor/lib -DDBINGESTOR_INCL
-UDE_PATH:PATH=/usr/local/DBIngestor/include ..
+cmake 
+\backslash
+
+\begin_inset Newline newline
+\end_inset
+
+-DDBINGESTOR_LIBRARY_PATH:PATH=/usr/local/DBIngestor/lib 
+\backslash
+
+\begin_inset Newline newline
+\end_inset
+
+-DDBINGESTOR_INCLUDE_PATH:PATH=/usr/local/DBIngestor/include ..
 \end_layout
 
 \begin_layout Enumerate
@@ -452,11 +462,13 @@ cust_odbc_bulk
 \begin_layout Itemize
 
 \series bold
---userValHeader, -V:
+--userVal, -V:
 \series default
  [default: 1]: If information is read from a header section in the ASCII
  file (as specified in the structure file), ask the user first if the data
  has been properly extracted (1 = TRUE, 0 = FALSE).
+ Also any other assumption that the code makes will be first checked with
+ the user.
 \end_layout
 
 \begin_layout Itemize
@@ -711,6 +723,46 @@ Constant columns:
 \begin_layout Standard
 Constant columns are columns that hold the same value (or using Converters
  are results of these):
+\end_layout
+
+\begin_layout Itemize
+numCol: as in data column, only starting with an 'C'
+\end_layout
+
+\begin_layout Itemize
+DType: as in data column
+\end_layout
+
+\begin_layout Itemize
+PrefixLen: this field is ignored
+\end_layout
+
+\begin_layout Itemize
+DataLen: this field is ignored
+\end_layout
+
+\begin_layout Itemize
+Separator: the constant value between two quotes
+\end_layout
+
+\begin_layout Itemize
+SchemaColName: as in data column
+\end_layout
+
+\begin_layout Itemize
+AssertAndConvList: as in data column
+\end_layout
+
+\begin_layout Subsection*
+Storage columns:
+\end_layout
+
+\begin_layout Standard
+Storage columns are constant columns that safe their value into memory for
+ further use after evaluation of all Converters.
+ This way, a calculated value can be taken over to the next row and further
+ modified (an evident example of this is incrementing a variable from row
+ to row by one) (or using Converters are results of these):
 \end_layout
 
 \begin_layout Itemize

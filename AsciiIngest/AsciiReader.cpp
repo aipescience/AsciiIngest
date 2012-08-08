@@ -22,6 +22,7 @@
 #include "AsciiHeaderReader.h"
 #include "asciiingest_error.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <iostream>
 #include <stdexcept>
 #include <string.h>
@@ -317,7 +318,9 @@ namespace AsciiIngest {
                 memcpy(result, tmpRes, DBDataSchema::getByteLenOfDType(thisItem->getDataObjDType()));
             }
             
-            fieldPositionArray[currId+1] = currStrPos;
+            if(thisItem->getOffsetId() != 0 && thisItem->getOffsetId() < numFieldPerRow-1) {
+                fieldPositionArray[currId+1] = fieldPositionArray[currId];
+            }
 
             return 0;
         }
@@ -379,6 +382,11 @@ namespace AsciiIngest {
         //apply conversion
         if(applyConverters == 1)
             isNull = applyConversions(thisItem, result);
+        
+        //write back result to memory, if this is a constant with a register type
+        if(thisItem->getIsStorageItem() == 1 && thisItem->getIsConstItem() == 1) {
+            thisItem->updateConstData(result);
+        }
         
         return isNull;
     }

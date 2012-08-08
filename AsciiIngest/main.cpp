@@ -122,7 +122,7 @@ int main (int argc, char * argv[])
     po::store(po::command_line_parser(argc, argv).options(progDesc).positional(posDesc).run(), varMap);
     po::notify(varMap);
     
-    if(varMap.count("help")) {
+    if(varMap.count("help") || varMap.count("?") || data.length() == 0 || structFile.length() == 0) {
         cout << progDesc;
         return EXIT_SUCCESS;
     }

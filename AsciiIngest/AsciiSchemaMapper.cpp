@@ -20,10 +20,12 @@
 #include "AsciiSchemaMapper.h"
 #include "asciiingest_error.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <iostream>
 #include <stdexcept>
 #include <assert.h>
 #include <vector>
+#include <string>
 #include <boost/xpressive/xpressive.hpp>
 #include <boost/algorithm/string.hpp>
 #include <DType.h>
@@ -265,8 +267,10 @@ namespace AsciiIngest {
         boost::xpressive::smatch what;
         if( regex_match(currLine, what, rex) ) {
             result.sep.assign(what[1].str());
-        } else {
-            AsciiIngest_error("AsciiSchemaMapper: Format file error: Error in separator declaration.\n");
+        } else { 
+            string errStr = "AsciiSchemaMapper: Format file error: Error in separator declaration.\n";
+            errStr += "Current line in struct file: " + currLine + "\n";
+            AsciiIngest_error(errStr.c_str());
         }
         
         //now replace any whitespaces in that separator string...
@@ -278,7 +282,9 @@ namespace AsciiIngest {
         boost::split(splitVec, currLine, boost::is_any_of("\t "), boost::token_compress_on);
         
         if(splitVec.size() < 6) {
-            AsciiIngest_error("AsciiSchemaMapper: This file does not seem to be a format file. Failed at split.\n");
+            string errStr = "AsciiSchemaMapper: This file does not seem to be a format file. Failed at split.\n";
+            errStr += "Current line in struct file: " + currLine + "\n";
+            AsciiIngest_error(errStr.c_str());
         }
         
         result.colNumString.assign(splitVec[0]);
@@ -289,7 +295,9 @@ namespace AsciiIngest {
         
         //check if DType is known and ok
         if(!DBDataSchema::testDType(result.DType)) {
-            AsciiIngest_error("AsciiSchmeaMapper: Format file error: You did not provide a propper DType\n");
+            string errStr = "AsciiSchemaMapper: Format file error: You did not provide a proper DType.\n";
+            errStr += "Current line in struct file: " + currLine + "\n";
+            AsciiIngest_error(errStr.c_str());
         }
         
         result.prefixLen.assign(splitVec[2]);
@@ -320,6 +328,7 @@ namespace AsciiIngest {
         int dataLen;
         bool isHeaderItem = 0;
         bool isConstantItem = 0;
+        bool isStorageItem = 0;
         
         //check if this is a header item or not
         //normal data columns should start with 'D' and then their column number - however to remain backward compatible, old way is still assumed
@@ -334,6 +343,12 @@ namespace AsciiIngest {
             currCol = atoi(currStr+1);
         } else if (rawData.colNumString.at(0) == 'C' || rawData.colNumString.at(0) == 'c') {
             isConstantItem = 1;
+            isStorageItem = 0;
+            const char* currStr = rawData.colNumString.c_str();
+            currCol = atoi(currStr+1);
+        } else if (rawData.colNumString.at(0) == 'S' || rawData.colNumString.at(0) == 's') {
+            isConstantItem = 1;
+            isStorageItem = 1;
             const char* currStr = rawData.colNumString.c_str();
             currCol = atoi(currStr+1);
         } else {
@@ -379,7 +394,7 @@ namespace AsciiIngest {
         currObjDesc->setDataObjName(rawData.schemaColName);
         
         currObjDesc->setIsHeaderItem(isHeaderItem);
-        currObjDesc->setIsConstItem(isConstantItem);
+        currObjDesc->setIsConstItem(isConstantItem, isStorageItem);
         
         //split the assertConvLists string and add asserter and converters to this data object
         if(rawData.assertConvList.size() > 0) {
@@ -485,7 +500,8 @@ namespace AsciiIngest {
                         //otherwise this is a constant value
                         if(currString.at(0) == 'D' || currString.at(0) == 'd' ||
                            currString.at(0) == 'H' || currString.at(0) == 'h' ||
-                           currString.at(0) == 'C' || currString.at(0) == 'c') {
+                           currString.at(0) == 'C' || currString.at(0) == 'c' ||
+                           currString.at(0) == 'S' || currString.at(0) == 's') {
                             
                             const char* currStr = currString.c_str();
                             int currCol = atoi(currStr+1);
@@ -518,7 +534,7 @@ namespace AsciiIngest {
                             currDatObj->setOffsetId(j);
                             currDatObj->setDataObjName("CONST_CONV_ITEM");
                             currDatObj->setIsHeaderItem(0);
-                            currDatObj->setIsConstItem(1);
+                            currDatObj->setIsConstItem(1, 0);
 
                             //crude check if we need a double or an integer:
                             if(currString.find('.') != currString.npos) {
