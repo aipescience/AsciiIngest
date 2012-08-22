@@ -61,6 +61,8 @@ find_package (ODBC)
 
 add_executable (AsciiIngest.x ${FILES_SRC})
 
+target_link_libraries(AsciiIngest.x ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
 if(SQLITE3_FOUND)
         target_link_libraries(AsciiIngest.x ${SQLITE3_LIBRARIES})
 endif()
@@ -74,6 +76,6 @@ if(ODBC_FOUND)
 endif()
 
 
-target_link_libraries(AsciiIngest.x ${Boost_PROGRAM_OPTIONS_LIBRARY} DBIngestor)
+target_link_libraries(AsciiIngest.x DBIngestor)
 
 
