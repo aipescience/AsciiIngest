@@ -260,6 +260,7 @@ namespace AsciiIngest {
                 //donot capture prefix, capture string up to the separator
                 if(i == lastItem) {
                     setEndLineFlag(currAsciiDatObj->getSep());
+                    fastSepAccessArray[i] = fastSepAccessArray[i-1];
                 } else {
                     lineRexString.append(currAsciiDatObj->getSep());
                     if( i != 0)

@@ -4,11 +4,11 @@ set(AIDIR "${PROJECT_SOURCE_DIR}/AsciiIngest")
 #set(DIDIR "${PROJECT_SOURCE_DIR}/../DBIngestor/DBIngestor")
 
 if(NOT DEFINED DBINGESTOR_LIBRARY_PATH)
-       set(DBINGESTOR_LIBRARY_PATH "/usr/local/DBIngestor/lib")
+       set(DBINGESTOR_LIBRARY_PATH "/usr/local/lib")
 endif()
 
 if(NOT DEFINED DBINGESTOR_INCLUDE_PATH)
-       set(DBINGESTOR_INCLUDE_PATH "/usr/local/DBIngestor/include")
+       set(DBINGESTOR_INCLUDE_PATH "/usr/local/include")
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/Modules/")
@@ -61,6 +61,8 @@ find_package (ODBC)
 
 add_executable (AsciiIngest.x ${FILES_SRC})
 
+target_link_libraries(AsciiIngest.x ${Boost_PROGRAM_OPTIONS_LIBRARY} DBIngestor)
+
 if(SQLITE3_FOUND)
         target_link_libraries(AsciiIngest.x ${SQLITE3_LIBRARIES})
 endif()
@@ -72,8 +74,4 @@ endif()
 if(ODBC_FOUND)
         target_link_libraries(AsciiIngest.x ${ODBC_LIBRARIES})
 endif()
-
-
-target_link_libraries(AsciiIngest.x ${Boost_PROGRAM_OPTIONS_LIBRARY} DBIngestor)
-
 

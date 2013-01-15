@@ -537,6 +537,11 @@ LY(D2; 12.0)
 
 \begin_layout Plain Layout
 
+#D2	CHAR	0		0	'0'		stringColumn	CONV_CONCAT(D1; "_")
+\end_layout
+
+\begin_layout Plain Layout
+
 #These are examples of header items 
 \end_layout
 
@@ -668,6 +673,12 @@ AssertAndConvList: A comma delimited list of asserter and converter functions.
  any numCol except ones own) or numerical values.
  If a Converter supports multiple function parameters, they are delimited
  by ';'.
+ Any string constant entered in the Converter needs to be placed between
+ double quotes '
+\begin_inset Quotes erd
+\end_inset
+
+'.
  The asserters and converters are applied from left to right.
 \end_layout
 
@@ -906,6 +917,14 @@ CONV_ISLT: (two params): tests first param < second param (1 if true, 0
 \begin_layout Itemize
 CONV_ISNE: (two params): tests first param != second param (1 if true, 0
  if false)
+\end_layout
+
+\begin_layout Itemize
+CONV_CONCAT: (two params): concats two strings (or casts type to string)
+\end_layout
+
+\begin_layout Itemize
+CONV_3CONVAT: (three params): concats three strings (or casts type to string)
 \end_layout
 
 \end_body

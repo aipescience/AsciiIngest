@@ -545,6 +545,14 @@ namespace AsciiIngest {
                                 currDatObj->setDataObjDType(DT_INT8);
                             }
 
+                            //check if this is a string
+                            if(currString.find('"') != currString.npos) {
+                                //this is a string
+                                currDatObj->setDataObjDType(DT_STRING);
+                                currString.erase(currString.find('"'), 1);
+                                currString.erase(currString.rfind('"'), 1);
+                            }
+
                             currDatObj->setSep(currString);
 
                             currConv->registerParameter(j, currDatObj);  
