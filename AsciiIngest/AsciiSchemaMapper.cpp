@@ -464,9 +464,10 @@ namespace AsciiIngest {
         boost::split(splitAssertConvVec, rawData.assertConvList, boost::is_any_of(","), boost::token_compress_on);
         
         for(int i=0; i<splitAssertConvVec.size(); i++) {
-            boost::to_upper(splitAssertConvVec.at(i));
+            string upperString(splitAssertConvVec.at(i));
+            boost::to_upper(upperString);
             
-            if (splitAssertConvVec.at(i).substr(0, 4).compare("CONV") == 0) {
+            if (upperString.substr(0, 4).compare("CONV") == 0) {
                 DBConverter::Converter * currConv = thisItem->getDataDesc()->getConversion(currConvIdx);
                 
                 if(currConv->getNumParameters() != 0) {

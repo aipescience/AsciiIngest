@@ -301,7 +301,9 @@ namespace AsciiIngest {
             getConstItem(thisItem, result);
             
             if(thisItem->getOffsetId() != 0 && thisItem->getOffsetId() < numFieldPerRow-1) {
-                fieldPositionArray[currId+1] = fieldPositionArray[currId];
+                if(fieldPositionArray[currId+1] == -1) {
+                    fieldPositionArray[currId+1] = fieldPositionArray[currId];
+                }
             }
 
             return 0;
@@ -320,7 +322,9 @@ namespace AsciiIngest {
             }
             
             if(thisItem->getOffsetId() != 0 && thisItem->getOffsetId() < numFieldPerRow-1) {
-                fieldPositionArray[currId+1] = fieldPositionArray[currId];
+                if(fieldPositionArray[currId+1] == -1) {
+                    fieldPositionArray[currId+1] = fieldPositionArray[currId];
+                }
             }
 
             return 0;
@@ -328,7 +332,6 @@ namespace AsciiIngest {
         
         currStrPos = fieldPositionArray[currId];
         
-
         if(oneLine.size() <= currStrPos) {
             AsciiIngest_error("AsciiReader: Error in getItemInRow. You want to read more than there is available.\n");
         }
@@ -339,7 +342,8 @@ namespace AsciiIngest {
             currStrPos += fastPrefixArray[currId] + fastLenArray[currId];
         } else {
             //read up to the next delimiter
-            if(currId == 0 ) {
+
+            if(currId == 0) {
                 //read non-greedy if needed...
                 do {
                     mdelimGetfield((char*)oneLine.c_str() + (currStrPos + fastPrefixArray[currId]), 
@@ -357,7 +361,7 @@ namespace AsciiIngest {
         }
         
         //save the currStrPos to the fast access array. This marks the beginning of the i+1th element in the line
-        if(currId+1 != numFieldPerRow) {
+        if(currId+1 != numFieldPerRow && fieldPositionArray[currId+1] == -1) {
             fieldPositionArray[currId+1] = currStrPos;
         }
 
