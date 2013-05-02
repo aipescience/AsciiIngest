@@ -81,18 +81,18 @@ unsigned long mdelimGetfield(char * charArray, string& outString, const char * d
     while(found == 0) {
         fieldEnd = strchr(fieldEnd, delim[0]);
 
-        if(fieldEnd == NULL) {
-            AsciiIngest_error("mdelimGetfield: I could not parse the data file since a given field delimiter could not be found! \nPlease check the format file for errors...\n");
-        }
-        
         //if this is a space, also parse for \ts
         if(delim[0] == 32) {
             char * tmp =charArray;
             tmp = strchr(tmp, 9);   //check for tabulator
-            if(tmp < fieldEnd && tmp != NULL)
+            if(tmp != NULL && (tmp < fieldEnd || fieldEnd == NULL))
                 fieldEnd = tmp;
         }
-        
+
+        if(fieldEnd == NULL) {
+            AsciiIngest_error("mdelimGetfield: I could not parse the data file since a given field delimiter could not be found! \nPlease check the format file for errors...\n");
+        }
+
         if(lenDelim > 1 && !strcmp(fieldEnd, &(delim[1]))) {
             found = 1;
             break;
