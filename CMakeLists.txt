@@ -1,7 +1,11 @@
 cmake_minimum_required (VERSION 2.6)
 project (AsciiIngest.x)
 set(AIDIR "${PROJECT_SOURCE_DIR}/AsciiIngest")
-#set(DIDIR "${PROJECT_SOURCE_DIR}/../DBIngestor/DBIngestor")
+
+############################################################################
+## SET THIS TO THE MYSQL BASE PATH IF IT IS NOT AT A STANDARD PLACE
+############################################################################
+set(MYSQL_BASE_PATH "/usr/local/mysql")
 
 if(NOT DEFINED DBINGESTOR_LIBRARY_PATH)
        set(DBINGESTOR_LIBRARY_PATH "/usr/local/lib")
@@ -38,26 +42,25 @@ include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
 find_package (SQLITE3)
-#if(SQLITE3_FOUND AND SQLITE3_BUILD_IFFOUND)#
-#	include_directories(${SQLITE3_INCLUDE_DIR})#
-#	add_definitions(-DDB_SQLITE3)#
-#	set(FILES_SRC ${FILES_SRC} "${DIDIR}/DBAdaptors/DBSqlite3.cpp" "${DIDIR}/DBAdaptors/DBSqlite3.h")
-#endif()
+message("Found SQLITE3: ${SQLITE3_FOUND}")
+if(SQLITE3_FOUND AND SQLITE3_BUILD_IFFOUND)
+	include_directories(${SQLITE3_INCLUDE_DIR})
+	add_definitions(-DDB_SQLITE3)
+endif()
 
 find_package (Mysql)
-#if(MYSQL_FOUND AND MYSQL_BUILD_IFFOUND)
-#	include_directories(${MYSQL_INCLUDE_DIR})
-#	add_definitions(-DDB_MYSQL)
-#	set(FILES_SRC ${FILES_SRC} "${DIDIR}/DBAdaptors/DBMySQL.cpp" "${DIDIR}/DBAdaptors/DBMySQL.h")
-#endif()
+message("Found MySQL: ${MYSQL_FOUND}")
+if(MYSQL_FOUND AND MYSQL_BUILD_IFFOUND)
+	include_directories(${MYSQL_INCLUDE_DIR})
+	add_definitions(-DDB_MYSQL)
+endif()
 
 find_package (ODBC)
-#if(ODBC_FOUND AND ODBC_BUILD_IFFOUND)
-#	include_directories(${ODBC_INCLUDE_DIRS})
-#	add_definitions(-DDB_ODBC)
-#	set(FILES_SRC ${FILES_SRC} "${DIDIR}/DBAdaptors/DBODBC.cpp" "${DIDIR}/DBAdaptors/DBODBC.h")
-#        set(FILES_SRC ${FILES_SRC} "${DIDIR}/DBAdaptors/DBODBCBulk.cpp" "${DIDIR}/DBAdaptors/DBODBCBulk.h")
-#endif()
+message("Found ODBC: ${ODBC_FOUND}")
+if(ODBC_FOUND AND ODBC_BUILD_IFFOUND)
+	include_directories(${ODBC_INCLUDE_DIRS})
+	add_definitions(-DDB_ODBC)
+endif()
 
 add_executable (AsciiIngest.x ${FILES_SRC})
 
