@@ -61,6 +61,7 @@ int main (int argc, char * argv[])
     bool usrVal;
     bool greedyDelim;
     bool isDryRun;
+    bool resumeMode;
 
     DBServer::DBAbstractor * dbServer;
     DBIngest::DBIngestor * asciiIngestor;
@@ -110,6 +111,7 @@ int main (int argc, char * argv[])
                 ("usrVal, V", po::value<bool>(&usrVal)->default_value(1), "double check whether any assumption I take, or things that might go wrong, are as intended by the user or not [default: 1]")
                 ("greedyDelim, G", po::value<bool>(&greedyDelim)->default_value(1), "should the delimiters be treated as greedy or non-greedy? in other words: should multiple equal delimiters be merged into one or not? [default: 1]")
                 ("isDryRun", po::value<bool>(&isDryRun)->default_value(0), "should this run be carried out as a dry run (no data added to database)? [default: 0]")
+                ("resumeMode,R", po::value<bool>(&resumeMode)->default_value(0), "try to resume ingest on failed connection (turns off transactions)? [default: 0]")
                 ;
     
     
@@ -126,12 +128,6 @@ int main (int argc, char * argv[])
         cout << progDesc;
         return EXIT_SUCCESS;
     }
-    
-    /*data = "/Users/adrian/Documents/eScience/tmp/z_0.000_dishalum";
-    structFile = "/Users/adrian/Documents/eScience/tmp/dump_z_0.000_dishalum.frm";
-    dbase = "tmp1";
-    table = "catalog";
-    user = "root";*/
     
     cout << "You have entered the following parameters:" << endl;
     cout << "Structure file: " << structFile << endl;
@@ -163,6 +159,9 @@ int main (int argc, char * argv[])
     }
     if(isDryRun == 1) {
         cout << "THIS IS A DRY RUN! No data will be added to the database!" << endl;
+    }
+    if(resumeMode == 1) {
+        cout << "We will try to resume on failed connections! Keep in mind though, that transactions are turned off." << endl;
     }
     
     DBAsserter::AsserterFactory * assertFac = new DBAsserter::AsserterFactory;
@@ -220,6 +219,7 @@ int main (int argc, char * argv[])
     //now ingest data after setup
     asciiIngestor->setPerformanceMeter(outputFreq);
     asciiIngestor->setIsDryRun(isDryRun);
+    asciiIngestor->setResumeMode(resumeMode);
     asciiIngestor->ingestData(bufferSize);    
     
     delete thisSchemaMapper;
