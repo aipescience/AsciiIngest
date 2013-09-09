@@ -182,6 +182,8 @@ namespace AsciiIngest {
         
         oneLine = buffer;
         
+        readCount++;
+
         return 1;
     }
     
@@ -363,6 +365,11 @@ namespace AsciiIngest {
         //save the currStrPos to the fast access array. This marks the beginning of the i+1th element in the line
         if(currId+1 != numFieldPerRow && fieldPositionArray[currId+1] == -1) {
             fieldPositionArray[currId+1] = currStrPos;
+        }
+
+        //check if this is NULL (i.e. empty string)
+        if(tmpStr.size() == 0) {
+            return 1;
         }
 
         //cast string accordingly and return
