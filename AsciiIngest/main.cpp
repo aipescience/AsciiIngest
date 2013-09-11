@@ -109,7 +109,7 @@ int main (int argc, char * argv[])
                 ("disableKeys", po::value<uint32_t>(&disableKeys)->default_value(0), "disables all keys/indexes on the table where you ingest to [default: 0]")
                 ("enableKeys", po::value<uint32_t>(&enableKeys)->default_value(0), "reenables the keys/indexes on the table. WARNING: This can take a long time, so only do this if you know what you are doing! [default: 0]")
                 ("usrVal, V", po::value<bool>(&usrVal)->default_value(1), "double check whether any assumption I take, or things that might go wrong, are as intended by the user or not [default: 1]")
-                ("greedyDelim, G", po::value<bool>(&greedyDelim)->default_value(1), "should the delimiters be treated as greedy or non-greedy? in other words: should multiple equal delimiters be merged into one or not? [default: 1]")
+                ("greedyDelim, G", po::value<bool>(&greedyDelim)->default_value(0), "should the delimiters be treated as greedy or non-greedy? in other words: should multiple equal delimiters be merged into one or not? [default: 1]")
                 ("isDryRun", po::value<bool>(&isDryRun)->default_value(0), "should this run be carried out as a dry run (no data added to database)? [default: 0]")
                 ("resumeMode,R", po::value<bool>(&resumeMode)->default_value(0), "try to resume ingest on failed connection (turns off transactions)? [default: 0]")
                 ;

@@ -90,7 +90,7 @@ unsigned long mdelimGetfield(char * charArray, string& outString, const char * d
         }
 
         if(fieldEnd == NULL) {
-            AsciiIngest_error("mdelimGetfield: I could not parse the data file since a given field delimiter could not be found! \nPlease check the format file for errors...\n");
+            AsciiIngest_error("mdelimGetfield: I could not parse the data file since a given field delimiter could not be found! \nPlease check the format file for errors...\nOr... Maybe you turned greedyDelim on and did not want to.\n");
         }
 
         if(lenDelim > 1 && !strcmp(fieldEnd, &(delim[1]))) {

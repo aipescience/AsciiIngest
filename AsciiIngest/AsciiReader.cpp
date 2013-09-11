@@ -335,7 +335,12 @@ namespace AsciiIngest {
         currStrPos = fieldPositionArray[currId];
         
         if(oneLine.size() <= currStrPos) {
-            AsciiIngest_error("AsciiReader: Error in getItemInRow. You want to read more than there is available.\n");
+            if(currId == numFieldPerRow - 1) {
+                //last value is NULL
+                return 1;
+            } else {
+                AsciiIngest_error("AsciiReader: Error in getItemInRow. You want to read more than there is available.\n");
+            }
         }
         
         //do we read to the delimiter or just a field of N chars?
