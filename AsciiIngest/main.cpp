@@ -1,5 +1,5 @@
 /*  
- *  Copyright (c) 2012, Adrian M. Partl <apartl@aip.de>, 
+ *  Copyright (c) 2012 - 2014, Adrian M. Partl <apartl@aip.de>, 
  *                      eScience team AIP Potsdam
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -85,6 +85,8 @@ int main (int argc, char * argv[])
     dbSystemDesc.append("cust_odbc, ");
     dbSystemDesc.append("cust_odbc_bulk, ");
 #endif
+
+    dbSystemDesc.append("csv, ");
     
     dbSystemDesc.append(") - [default: mysql]");
     
@@ -214,7 +216,9 @@ int main (int argc, char * argv[])
         asciiIngestor->setSocket(socket);
         asciiIngestor->setPort(port);
         asciiIngestor->setHost(host);
-    }  
+    } else if (system.compare("csv") == 0) {
+        asciiIngestor->setSocket(socket);
+    }
     
     //now ingest data after setup
     asciiIngestor->setPerformanceMeter(outputFreq);
