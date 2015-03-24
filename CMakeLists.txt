@@ -37,7 +37,7 @@ file(GLOB FILES_SRC "${AIDIR}/*.h" "${AIDIR}/*.cpp")
 #MESSAGE(STATUS "Dir: " ${DIDIR})
 
 SET(Boost_USE_MULTITHREAD ON)
-find_package (Boost COMPONENTS program_options REQUIRED)
+find_package (Boost 1.40 COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
