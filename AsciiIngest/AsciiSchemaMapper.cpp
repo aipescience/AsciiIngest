@@ -217,6 +217,10 @@ namespace AsciiIngest {
             return DBT_CHAR;
         }
         
+        if(fromDType == "INT1") {
+            return DBT_TINYINT;
+        }
+
         if(fromDType == "INT2") {
             return DBT_SMALLINT;
         }
