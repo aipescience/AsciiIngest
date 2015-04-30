@@ -79,7 +79,7 @@ namespace AsciiIngest {
         boost::replace_all(newSep, "\\\\", "\\");
         boost::replace_all(newSep, "\\0", "\0");
         
-        strncpy(sep, newSep.c_str(), 10);        
+        strncpy(sep, newSep.c_str(), 256);        
     }
     
     void AsciiDataObjDesc::setGreedy(int newGreedy) {
